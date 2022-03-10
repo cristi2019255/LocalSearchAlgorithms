@@ -11,6 +11,7 @@ def read_graph_from_file(filename = ''):
     Returns:
         _type_: _description_
     """
+    max_degree = 0
     try:
         graph = []
         with open(filename) as file:
@@ -22,9 +23,11 @@ def read_graph_from_file(filename = ''):
                 vertices = data[3:]
                 vertices = list(map(int, vertices))
                 graph.append(vertices)                                
+                if max_degree < len(vertices):
+                    max_degree = len(vertices)
     except Exception as e:
         print(e)        
-    return graph
+    return graph, max_degree
 
 def construct_graph_nx(graph):
     G = nx.Graph()    
@@ -44,8 +47,13 @@ def plot_graph(graph, partitioned = False):
     plt.show()
     
 
-def plot_partitioned_graph(graph, partition):
-    color_map = list(map(lambda x: 'red' if x==0 else 'blue', partition))    
+def plot_partitioned_graph(graph, partition):    
+    color_map = []
     G = construct_graph_nx(graph)    
+    for node in G:
+        if partition[node - 1] == 0:
+            color_map.append('red')
+        else:
+            color_map.append('blue')
     nx.draw(G, node_color=color_map, with_labels=True)
     plt.show()
