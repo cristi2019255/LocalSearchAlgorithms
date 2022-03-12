@@ -40,8 +40,10 @@ class GA:
             self.fitnesses.append(fitness)
             
     def uniform_crossover(self, parent1, parent2):
+        ### check hamming distance of a parent if bigger than N/2 flip all bits and then do the crossover
+        
         probabilities = np.random.rand(self.solution_size) < 0.5
         offspring = np.copy(parent1)           
         offspring[probabilities] = parent2[probabilities]        
-        ### to check if consisten solution
+        ### to check if consistent solution
         return offspring
