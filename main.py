@@ -1,8 +1,15 @@
 from datetime import datetime
+from graph_tools.generator import generate_graph
+from graph_tools.ploter import plot_graph, plot_partitioned_graph
+from graph_tools.reader import read_graph_from_file
+from local_search_algorithms.GLS import GLS
+from local_search_algorithms.ILS import ILS
 from local_search_algorithms.MLS import MLS
-from utils import compute_statistics, generate_graph, plot_graph, plot_partitioned_graph, read_graph_from_file, save_graph, test_GLS, test_ILS, test_MLS
+from utils import compute_statistics, experiment
+
 
 FILE_NAME = './G500.txt'
+NR_OF_FM_CALLS = 10000
 
 def test_FM(graph, positions):        
     start = datetime.now()
@@ -17,14 +24,15 @@ def main():
     #graph, positions = generate_graph(500,random=True)                       
     #plot_graph(graph, positions)       
     #test_FM(graph, positions)
-    test_MLS(graph)
-    #test_ILS(graph = graph, results_file_name= './Results/ILS_01.txt', probability = 0.01)
-    #test_ILS(graph = graph, results_file_name= './Results/ILS_05.txt', probability = 0.05)
-    #test_ILS(graph = graph, results_file_name= './Results/ILS_10.txt', probability = 0.1)
-    #test_GLS(graph = graph, results_file_name= './Results/GLS_5.txt', population_size= 5)
-    #test_GLS(graph = graph, results_file_name= './Results/GLS_10.txt', population_size= 10)
-    #test_GLS(graph = graph, results_file_name= './Results/GLS_20.txt', population_size= 20)
-    #compute_statistics()
+    #experiment('./Results/MLS.txt', MLS)(graph = graph)
+    #experiment('./Results/ILS_01.txt', ILS)(graph = graph, probability = 0.01 , nr_of_calls = NR_OF_FM_CALLS)
+    #experiment('./Results/ILS_05.txt', ILS)(graph = graph, probability = 0.05 , nr_of_calls = NR_OF_FM_CALLS)
+    #experiment('./Results/ILS_10.txt', ILS)(graph = graph, probability = 0.1 , nr_of_calls = NR_OF_FM_CALLS)
+    experiment('./Results/ILS_20.txt', ILS)(graph = graph, probability = 0.2 , nr_of_calls = NR_OF_FM_CALLS)
+    #experiment('./Results/GLS_20.txt', GLS)(graph = graph, population_size = 5 , nr_of_calls = NR_OF_FM_CALLS)   
+    #experiment('./Results/GLS_20.txt', GLS)(graph = graph, population_size = 10, nr_of_calls = NR_OF_FM_CALLS)
+    #experiment('./Results/GLS_20.txt', GLS)(graph = graph, population_size = 20, nr_of_calls = NR_OF_FM_CALLS)
+    compute_statistics()
     
 if __name__ == '__main__':
     main()
