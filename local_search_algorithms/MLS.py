@@ -1,12 +1,14 @@
-from local_search_algorithms.FM import FM
+from local_search_algorithms.FM import FM, FM_pass
 from local_search_algorithms.utils import generate_random_solution
-from tqdm import tqdm
 
-def MLS(nr_of_runs = 1000, graph = []):
+def MLS(nr_of_calls = 1000, graph = []):
     N = len(graph)
     assert(N % 2 == 0)
     min_cuts, best_optimum = N * N, None    
-    for _ in tqdm(range(nr_of_runs)):
+    
+    FM_pass.set_count_calls(0) ## setting the number of calls of FM_pass to 0    
+    
+    while (FM_pass.call_count <= nr_of_calls):
         solution = generate_random_solution(N)
         local_optimum, cuts = FM(solution, graph)
         
@@ -14,5 +16,6 @@ def MLS(nr_of_runs = 1000, graph = []):
             print("New best optimum: " + str(cuts))
             best_optimum = local_optimum
             min_cuts = cuts
-                
+        
+    FM_pass.set_count_calls(0) ## setting the number of calls of FM_pass to 0
     return best_optimum, min_cuts

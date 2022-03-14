@@ -1,6 +1,7 @@
 import numpy as np
 from llist import dllist
 from numba import jit
+from local_search_algorithms.count_calls import count_calls
 
 def FM(solution, graph):
     "Fiduccia-Maththyeses (FM) local search algorithm for graph bipartitioning"
@@ -12,11 +13,12 @@ def FM(solution, graph):
             last_solution, last_cut = solution, cut
         else:
             break
-    
+                
     #print("solution: " + str(last_solution))
     #print("min cuts: " + str(last_cut))
     return last_solution, last_cut
 
+@count_calls
 def FM_pass(solution, graph):            
     N = len(graph)    
     assert(N % 2 == 0)    
@@ -54,11 +56,11 @@ def FM_pass(solution, graph):
                 bucket[gains[v]].remove(cells[v])                                                                
                 
                 if bucket[gains[v]].size == 0:
-                    bucket.pop(gains[v])
+                    bucket.pop(gains[v]) # O(1)
                     
                 gains[v] += delta_gain  
                 
-                if not (gains[v] in bucket.keys()):
+                if not (gains[v] in bucket.keys()): # O(1)
                     bucket[gains[v]] = dllist()
                     
                 bucket[gains[v]].appendright(v)
@@ -85,7 +87,7 @@ def compute_gain_buckets(solution, graph):
         part = solution[i]
         vs = graph[i]
         m = len(vs)
-        co = int(np.sum(solution[vs])) ## all the ones in solution
+        co = int(np.sum(solution[vs])) ## all the ones in solution O(|V|)
         gain = part * (m - co) + (1 - part) * co      # if part == 0 then the counterpart with the sum of ones is co else the counterpart with sum of zeros is m - co, this is the positive part of gain
         cut += gain 
         gain -= ((1 - part) * (m - co) + (part) * co) # if part == 0 then (m - co) zeros to subtract else co ones to subtract, the negative part of gain
@@ -93,7 +95,7 @@ def compute_gain_buckets(solution, graph):
 
         bucket = left_bucket if part == 0 else right_bucket                                
         
-        if not (gain in bucket.keys()):
+        if not (gain in bucket.keys()): #O(1)
             bucket[gain] = dllist()
         bucket[gain].appendright(i)            
         cells.append(bucket[gain].last)            

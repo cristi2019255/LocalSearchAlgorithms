@@ -1,7 +1,17 @@
+from datetime import datetime
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
+import re
+from tqdm import tqdm
+from local_search_algorithms.GLS import GLS
+from local_search_algorithms.ILS import ILS
+from local_search_algorithms.MLS import MLS
+
+NR_OF_CALLS = 10000
+NR_OF_RUNS = 25   
+
 
 def read_graph_from_file(filename = ''):
     """_summary_: Reading a graph from file
@@ -18,13 +28,14 @@ def read_graph_from_file(filename = ''):
         with open(filename) as file:
             lines = file.readlines()
             for line in lines:
-                data = line.strip().split(' ')                
+                data = re.split(r"\s+", line.strip())                           
                 x, y = data[1][1:-1].split(',')
                 x, y = float(x), float(y)
                 positions.append((x,y))
                 vertices = data[3:]
-                vertices = list(map(lambda x: x-1,list(map(int, vertices))))
+                vertices = list(map(lambda x: x-1,list(map(int, vertices))))                
                 graph.append(vertices)                                
+            file.close()
     except Exception as e:
         print(e)       
     return graph, positions
@@ -102,4 +113,64 @@ def generate_graph(size = 10, fully_connected = False, random = False):
                             if not (i in graph[v]):
                                 graph[v].append(i)
     return graph, pos
+
+def save_graph(file_name, graph, pos):
+    with open(file_name,'w') as f:
+        for i in range(len(graph)):
+            line = str((i+1)) + ' ' + '(' + str(pos[i][0]) + ',' + str(pos[i][1]) + str(len(graph[i]))
+            for v in graph[i]:
+                line += ' ' + str(v + 1)
+            line += '\n'
+            f.write(line)
+        f.close()    
+             
+        
+def test_MLS(graph = [], results_file_name = './Results/MLS.txt'):
+    with open(results_file_name, 'w') as file:
+        start = datetime.now()
+        for _ in tqdm(range(NR_OF_RUNS)):
+            solution, optimum_cuts = MLS(nr_of_calls = NR_OF_CALLS, graph= graph)
+            file.write(str(optimum_cuts) + ' ')
+        end = datetime.now()
+        print('Run time: ' + str(end-start)) 
+        file.write('\nRun time:' + str(end-start))
+        file.close()
+    print(f'Done, take a look in {results_file_name} ...')
     
+def test_ILS(graph = [], results_file_name = './Results/ILS_01.txt', probability = 0.01):
+    with open(results_file_name, 'w') as file:
+        start = datetime.now()
+        for _ in tqdm(range(NR_OF_RUNS)):
+            solution, optimum_cuts = ILS(nr_of_calls = NR_OF_CALLS, graph= graph, probability= probability)
+            file.write(str(optimum_cuts) + ' ')
+        
+        end = datetime.now()
+        print('Run time: ' + str(end-start)) 
+        file.write('\nRun time:' + str(end-start))
+        file.close()
+        
+    print(f'Done, take a look in {results_file_name} ...')
+    
+def test_GLS(graph = [], results_file_name = './Results/GLS_5.txt', population_size = 5):
+    with open(results_file_name, 'w') as file:
+        start = datetime.now()
+        for _ in tqdm(range(NR_OF_RUNS)):
+            solution, optimum_cuts = GLS(nr_of_calls = NR_OF_CALLS, graph= graph, population_size= population_size)
+            file.write(str(optimum_cuts) + ' ')
+        
+        end = datetime.now()
+        print('Run time: ' + str(end-start))             
+        file.write('\nRun time:' + str(end-start))
+        file.close()
+    print(f'Done, take a look in {results_file_name} ...')
+    
+def compute_statistics():
+    file_names = ['MLS','ILS_01', 'ILS_05', 'ILS_10', 'GLS_5', 'GLS_10','GLS_20']
+    file_names = list(map(lambda x: './Results/' + x + '.txt', file_names))
+    for file_name in file_names:
+        with open(file_name, 'r') as file:
+            line = file.readline()
+            optimums = list(map(float,line.split(' ')))
+            file.close()    
+        plt.boxplot(optimums)
+        plt.show()

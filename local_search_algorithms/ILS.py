@@ -1,18 +1,22 @@
 from random import sample
-from local_search_algorithms.FM import FM
+from local_search_algorithms.FM import FM, FM_pass
 from local_search_algorithms.utils import generate_random_solution
 import numpy as np
-from tqdm import tqdm
 
-def ILS(nr_of_runs = 25, graph = []):
+def ILS(nr_of_calls = 25, graph = [], probability = 0.1):
     N = len(graph)
     solution = generate_random_solution(N)
-    optimum, min_cuts = FM(solution, graph)
-    for _ in tqdm(range(nr_of_runs)):
-        new_optimum, cuts = FM(mutate(optimum), graph)
-        if cuts < min_cuts:
-            optimum = new_optimum                    
+    FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0
+    optimum, min_cuts = FM(solution, graph)    
     
+    while(FM_pass.call_count <= nr_of_calls):
+        new_optimum, cuts = FM(mutate(optimum, probability = probability), graph)
+        if cuts < min_cuts:
+            optimum = new_optimum          
+            min_cuts = cuts          
+            print(f'New best optimum: {cuts}')
+
+    FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0            
     return optimum, min_cuts
 
 def mutate(solution, probability = 0.1):
@@ -28,7 +32,7 @@ def mutate(solution, probability = 0.1):
         else:
             ones.append(i)
     
-    ## TODO: to ensure that mutated solutions are still valid 
+    ## Ensuring that mutated solutions are still valid 
     
     if (len(zeros) == len(ones)):
         return solution                        
