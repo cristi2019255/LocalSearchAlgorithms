@@ -1,16 +1,16 @@
 from local_search_algorithms.FM import FM, FM_pass
 from local_search_algorithms.utils import generate_random_solution
 
-def MLS(nr_of_calls = 1000, graph = []):
+def MLS(stopping_criterion, graph = []):
     N = len(graph)
     assert(N % 2 == 0)
     min_cuts, best_optimum = N * N, None    
     
     FM_pass.set_count_calls(0) ## setting the number of calls of FM_pass to 0    
     
-    while (FM_pass.call_count <= nr_of_calls):
+    while not stopping_criterion():
         solution = generate_random_solution(N)
-        local_optimum, cuts = FM(solution, graph)
+        local_optimum, cuts = FM(stopping_criterion, solution, graph)
         
         if cuts < min_cuts:
             print("New best optimum: " + str(cuts))

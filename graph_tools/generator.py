@@ -2,6 +2,17 @@ import numpy as np
 import math
 
 def generate_graph(size = 10, fully_connected = False, random = False):    
+    """ Generate a graph for graph bipartitioning problem
+
+    Args:
+        size (int, optional): The number of vertices for the generated graph. Defaults to 10.
+        fully_connected (bool, optional): If is set to True the generated graph is fully connected. Defaults to False.
+        random (bool, optional): If set to True each vertex 'i' in the generated graph besides edges to vertices 'i-1' and 'i+1'
+        has edges to 3 random chosen vertices. Defaults to False.
+
+    Returns:
+        list of lists, list: the generated graph, vertices positions in plane
+    """
     graph = []
     pos = []    
     dtheata = 2* math.pi/size
@@ -46,6 +57,8 @@ def generate_graph(size = 10, fully_connected = False, random = False):
     return graph, pos
 
 def save_graph(file_name, graph, pos):
+    """ Saving the graph to a file
+    """
     with open(file_name,'w') as f:
         for i in range(len(graph)):
             line = str((i+1)) + ' ' + '(' + str(pos[i][0]) + ',' + str(pos[i][1]) + str(len(graph[i]))

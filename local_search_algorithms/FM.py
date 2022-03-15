@@ -3,23 +3,53 @@ from llist import dllist
 from numba import jit
 from local_search_algorithms.count_calls import count_calls
 
-def FM(solution, graph):
-    "Fiduccia-Maththyeses (FM) local search algorithm for graph bipartitioning"
+def FM(stopping_criterion, solution, graph):
+    """
+        Fiduccia-Maththyeses (FM) local search algorithm for graph bipartitioning
+    
+    Args:
+        stopping_criterion: () -> bool 
+        solution: list of bits
+        graph: list of lists of int    
+    Returns:
+        (best_solution, min_cut): best partition of the graph found until stopping criterion is not reached
+        & minimum number of cuts in this partition
+    """
     
     last_solution, last_cut = FM_pass(solution, graph)    
-    while True:
+    while not stopping_criterion():
         solution, cut = FM_pass(last_solution, graph)        
         if cut < last_cut:
             last_solution, last_cut = solution, cut
         else:
             break
-                
-    #print("solution: " + str(last_solution))
-    #print("min cuts: " + str(last_cut))
+        
     return last_solution, last_cut
 
 @count_calls
 def FM_pass(solution, graph):            
+    """"
+        Fiduccia-Maththyeses pass (FM_pass) local search algorithm for graph bipartitioning
+
+
+        Complexity O(|E|) - linear in number of edges    
+        ------------------------------------------------------------------------------------------------------------------------------
+        Bucket data structure: Dictionary with gain as key and a doubly linked list of vertices with the corresponding gain as element
+        Cells: The list of references to the vertices objects in the doubly linked list 
+        (this references are kept to make the complexity of removing from list O(1))
+        locked_vertices: a list that keep the order in which the vertices were chosen
+        (this list is kept in order to reconstruct the best solution from the initial configuration)
+        free_vertices: a list of bits that mark if a vertex is free (used when the bucket gains are updated)
+        gains: a list of int with gain for each vertex (used to update buckets in O(1))
+        
+    Args:
+        solution (list of bits)
+        graph (list of ints)
+
+    Returns:
+        best_partition, minimal_cut (list of bits, int ): best partition of the graph found after a pass & minimum number of cuts in this partition
+    """
+    
     N = len(graph)    
     assert(N % 2 == 0)    
     initial_solution = solution[:]                   
@@ -30,7 +60,7 @@ def FM_pass(solution, graph):
     cuts[0] = cut
     ##### -------------    
     
-    ### FM main idea    
+    ### removing vertex with the max gain and updating buckets    
     for i in range(N):    
         # choosing the bucket with the biggest nr of vertices
         bucket = left_bucket if (i % 2 == 0) else right_bucket                
@@ -42,7 +72,7 @@ def FM_pass(solution, graph):
         locked_vertices[i] = v_fixed # lock the vertex
         free_vertices[v_fixed] = 0 # mark as non-free
         cuts[i + 1] = cuts[i] - int(best_gain) # save cuts value                        
-        bucket[best_gain].remove(cells[v_fixed]) ## remove from bucket                        
+        bucket[best_gain].remove(cells[v_fixed]) ## remove from bucket  O(1)                      
         
         if bucket[best_gain].size == 0:
             bucket.pop(best_gain)
@@ -65,15 +95,14 @@ def FM_pass(solution, graph):
                     
                 bucket[gains[v]].appendright(v)
                 cells[v] = bucket[gains[v]].last
-                        
-    ### Complexity O(|E|) - linear in number of edges    
-    ### -------------------------------------            
+                                    
     return find_optimal_solution(initial_solution, cuts, locked_vertices)
 
 
 def compute_gain_buckets(solution, graph):
     """
-        compute initial gains, initial cut and constructing buckets
+        Compute initial gains, initial cut and constructing buckets
+        Complexity: O(|E|) - linear in number of edges    
     """ 
            
     N = len(graph)    
@@ -84,10 +113,9 @@ def compute_gain_buckets(solution, graph):
     cells = []
     
     for i in range(N):        
-        part = solution[i]
-        vs = graph[i]
+        part, vs = solution[i], graph[i]
         m = len(vs)
-        co = int(np.sum(solution[vs])) ## all the ones in solution O(|V|)
+        co = int(np.sum(solution[vs])) ## all the ones in solution
         gain = part * (m - co) + (1 - part) * co      # if part == 0 then the counterpart with the sum of ones is co else the counterpart with sum of zeros is m - co, this is the positive part of gain
         cut += gain 
         gain -= ((1 - part) * (m - co) + (part) * co) # if part == 0 then (m - co) zeros to subtract else co ones to subtract, the negative part of gain
@@ -100,18 +128,29 @@ def compute_gain_buckets(solution, graph):
         bucket[gain].appendright(i)            
         cells.append(bucket[gain].last)            
         
-    ### Complexity O(|E|) - linear in number of edges    
-    ### -------------------------------------        
     return left_bucket, right_bucket, gains, int(cut/2), cells
 
 @jit
 def find_optimal_solution(solution, cuts, locked_vertices): 
+    """
+        Finds the optimal solution in the FM_pass
+        
+    Args:
+        solution (list of bits): initial solution passed in FM_pass
+        cuts (list of int): the list of minimal cuts for each configuration
+        locked_vertices (list of int): the order of locked vertices (used to restore configuration from initial solution)
+
+    Returns:
+        best_configuration & the cuts in this configuration
+    """
     min_index = get_min_index(cuts)        
     return restore_configuration(solution, locked_vertices, min_index), cuts[min_index]
 
 @jit
 def get_min_index(cuts):    
-    # search for min_index in cuts that are valid
+    """
+        Search for index where the cut is minimal in cuts that are valid
+    """   
     min_index = 0
     for i in range(0, len(cuts), 2):          
         if cuts[i] < cuts[min_index]:
@@ -120,7 +159,9 @@ def get_min_index(cuts):
 
 @jit
 def restore_configuration(solution, locked_vertices, min_index):
-    # restore configuration of the min cut from the initial solution    
+    """
+        Restore configuration of the min cut from the initial solution    
+    """
     for i in range(min_index):
         solution[locked_vertices[i]] = 1 - solution[locked_vertices[i]]    
     return solution

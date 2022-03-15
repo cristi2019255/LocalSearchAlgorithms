@@ -6,6 +6,10 @@ __pycache__/
 # txt extensions
 *.txt
 
+# image files
+*.png
+*.jpeg
+
 # C extensions
 *.so
 

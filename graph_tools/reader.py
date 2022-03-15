@@ -1,12 +1,12 @@
 import re
 def read_graph_from_file(filename = ''):
-    """_summary_: Reading a graph from file
+    """ Reading a graph from file
 
     Args:
-        filename (_type_, optional): _description_. Defaults to FILE_NAME.
+        filename (string, optional): The filename in which the graph is stored. Defaults to ''.
 
     Returns:
-        _type_: _description_
+        list of lists, list: The graph & vertices positions in plane
     """
     try:
         graph = []

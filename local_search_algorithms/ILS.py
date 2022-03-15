@@ -3,26 +3,89 @@ from local_search_algorithms.FM import FM, FM_pass
 from local_search_algorithms.utils import generate_random_solution
 import numpy as np
 
-def ILS(nr_of_calls = 25, graph = [], probability = 0.1):
+def ILS(stopping_criterion, graph = [], probability = 0.1):
+    """
+    Iterated local search for graph bipartitioning problem.
+
+    Args:
+        stopping_criterion (() -> bool): the stopping criterion of the algorithm 
+        graph (list, optional): Defaults to [].
+        probability(float, optional): The perturbation size for solutions. Defaults to 0.1. 
+    Returns:
+        (list, int): best solution found & minimum number of cuts
+    """
     N = len(graph)
     solution = generate_random_solution(N)
     FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0
-    optimum, min_cuts = FM(solution, graph)    
-    
-    while(FM_pass.call_count <= nr_of_calls):
-        new_optimum, cuts = FM(mutate(optimum, probability = probability), graph)
+    optimum, min_cuts = FM(stopping_criterion, solution, graph)    
+    similarities = 0
+    while not stopping_criterion():
+        new_optimum, cuts = FM(stopping_criterion, mutate(optimum, probability = probability), graph)
         if cuts < min_cuts:
             optimum = new_optimum          
             min_cuts = cuts          
             print(f'New best optimum: {cuts}')
+   
+    #    elif cuts == min_cuts:
+    #       similarities += 1     
+    #print(similarities)
+   
+    FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0            
+    return optimum, min_cuts
 
+def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta = 0.5, operators = []):
+    """
+    Adaptive algorithm for iterated local search that choose the best perturbation operator from a list of given operators 
+    for graph bipartitioning problem.
+
+    Args:
+        stopping_criterion (() -> bool): the stopping criterion of the algorithm 
+        graph (list, optional): Defaults to [].
+        P_min (float, optional): The minimum probability with which an operator can be applied. Defaults to 0.1.
+        alpha (float, optional): Learning rate for reward estimates. Defaults to 0.5.
+        beta (float, optional): Learning rate for operator probabilities estimates. Defaults to 0.5.
+        operators (list, optional): The list of operators from where the algorithm is aimed to favor the best. Defaults to [].
+
+    Returns:
+        (list, int): best solution found & minimum number of cuts
+    """
+    N = len(graph)
+    K = len(operators)
+    P_max = 1 - (K-1) * P_min 
+    operators_probabilities = [1/K] * K
+    estimated_rewards = [1.0] * K
+    
+    solution = generate_random_solution(N)
+    optimum, min_cuts = FM(stopping_criterion, solution, graph)        
+        
+    FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0                
+    while not stopping_criterion():
+        operator_index = np.random.choice(range(K), 1, p=operators_probabilities)[0]        
+        operator_selected = operators[operator_index]
+        new_optimum, cuts = FM(stopping_criterion, mutate(optimum, probability = operator_selected), graph)
+        if cuts < min_cuts:
+            optimum = new_optimum          
+            min_cuts = cuts          
+            reward = 1
+            print(f'New best optimum: {cuts}')
+        else:
+            reward = 0
+        
+        estimated_rewards[operator_index] += alpha * (reward - estimated_rewards[operator_index])
+        best_operator_index = np.argmax(estimated_rewards)        
+        for i in range(K):
+            if i == best_operator_index:
+                operators_probabilities[best_operator_index] += beta * (P_max - operators_probabilities[best_operator_index])
+            else:
+                operators_probabilities[i] += beta * (P_min - operators_probabilities[i])
+
+    print(operators_probabilities)
     FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0            
     return optimum, min_cuts
 
 def mutate(solution, probability = 0.1):
     N = len(solution)    
-    zeros = []
-    ones = []
+    zeros, ones = [], []
     probabilities = np.random.random(N) <= probability 
     for i in range(N):
         if probabilities[i] == 1:
@@ -38,11 +101,9 @@ def mutate(solution, probability = 0.1):
         return solution                        
     
     diff = int(abs(len(zeros) - len(ones)) / 2)
-    c = sample(ones, k=diff)  if (len(zeros) < len(ones)) else sample(zeros, k=diff)
+    corrections = sample(ones, k=diff)  if (len(zeros) < len(ones)) else sample(zeros, k=diff)
     
-    for i in c:
+    for i in corrections:
         solution[i] = 1 - solution[i]     
-    
-    #print(solution)   
-    #print(np.sum(solution) == int(N/2))
+        
     return solution

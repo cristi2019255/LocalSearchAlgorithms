@@ -9,10 +9,11 @@ def construct_graph_nx(graph):
     return G
 
 def plot_graph(graph, positions):
-    """_summary_: visualize a graph
+    """ Visualize a graph
 
     Args:
-        graph (_type_): _description_
+        graph (list of lists): The graph to be visualized
+        positions (list of (float,float)): Vertices positions in plane 
     """
     G = construct_graph_nx(graph)
     nx.draw(G, with_labels = True, pos = positions)        
@@ -20,6 +21,13 @@ def plot_graph(graph, positions):
     
 
 def plot_partitioned_graph(graph, partition, positions):    
+    """ Visualize the partitioned graph
+
+    Args:
+        graph (list of lists): The graph to be visualized
+        positions (list of (float,float)): Vertices positions in plane 
+        partition (list): The partition
+    """
     color_map = []
     G = construct_graph_nx(graph)    
     for node in G:
