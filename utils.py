@@ -11,7 +11,7 @@ from local_search_algorithms.MLS import MLS
 NR_OF_RUNS = 25  
 NR_OF_FM_CALLS = 10000
 RESULTS_DIRECTORY = './Results' 
-EXPERIMENTS = ['MLS','ILS_01', 'ILS_05', 'ILS_10', 'ILS_20', 'ILS_50','adaptive_ILS', 'GLS_5', 'GLS_10','GLS_20', 'GLS_50', 'GLS_100', 'GLS_300', 'GLS_500']
+EXPERIMENTS = ['MLS','ILS_01', 'ILS_05', 'ILS_10', 'ILS_15', 'ILS_20', 'ILS_50','adaptive_ILS', 'GLS_5', 'GLS_10','GLS_20', 'GLS_50', 'GLS_100', 'GLS_300', 'GLS_500']
     
 def compute_statistics():            
     file_names = list(map(lambda x: './Results/' + x + '.txt', EXPERIMENTS))
