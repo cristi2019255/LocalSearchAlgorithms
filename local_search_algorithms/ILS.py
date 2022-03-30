@@ -18,7 +18,8 @@ def ILS(stopping_criterion, graph = [], probability = 0.1):
     solution = generate_random_solution(N)
     FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0
     optimum, min_cuts = FM(stopping_criterion, solution, graph)    
-    similarities = 0
+    same_attraction_region = 0
+    nr_perturbations = 0
     while not stopping_criterion():
         new_optimum, cuts = FM(stopping_criterion, mutate(optimum, probability = probability), graph)
         if cuts < min_cuts:
@@ -26,12 +27,15 @@ def ILS(stopping_criterion, graph = [], probability = 0.1):
             min_cuts = cuts          
             print(f'New best optimum: {cuts}')
    
-    #    elif cuts == min_cuts:
-    #       similarities += 1     
-    #print(similarities)
+        elif cuts == min_cuts:
+           same_attraction_region += 1     
+        
+        nr_perturbations += 1
+    
+    print(f'Same region of attraction: {same_attraction_region}/{nr_perturbations}')    
    
     FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0            
-    return optimum, min_cuts
+    return optimum, min_cuts, (same_attraction_region / nr_perturbations)
 
 def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta = 0.5, operators = []):
     """
@@ -85,7 +89,7 @@ def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta 
 
 def mutate(solution, probability = 0.1):
     N = len(solution)    
-    zeros, ones = [], []
+    zeros, ones = [], [] 
     probabilities = np.random.random(N) <= probability 
     for i in range(N):
         if probabilities[i] == 1:

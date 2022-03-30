@@ -30,15 +30,22 @@ def compute_statistics():
 
 def experiment(results_file_name, func):
     def experiment_wrapper(*args, **kwargs):                
+        same_region_proportions = []
         with open(results_file_name, 'w') as file:
             start = datetime.now()
-            for _ in tqdm(range(NR_OF_RUNS)):                
-                solution, optimum_cuts = func(*args, **kwargs)            
+            for _ in tqdm(range(NR_OF_RUNS)): 
+                if func.__name__ == 'ILS':
+                    solution, optimum_cuts, same_region_proportion = func(*args, **kwargs)
+                    same_region_proportions.append(same_region_proportion)
+                else:               
+                    solution, optimum_cuts = func(*args, **kwargs)            
                 file.write(str(optimum_cuts) + ' ')
                                       
             end = datetime.now()
             print('Run time: ' + str(end-start))                     
             file.write('\nRun time:' + str(end-start))
+            if func.__name__ == 'ILS':
+                file.write('\nSame region proportion: ' + str(same_region_proportions))
             file.close()
         print(f'Done, take a look in {results_file_name} ...')
     
