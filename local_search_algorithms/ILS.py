@@ -88,26 +88,29 @@ def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta 
     return optimum, min_cuts
 
 def mutate(solution, probability = 0.1):
-    N = len(solution)    
-    zeros, ones = [], [] 
-    probabilities = np.random.random(N) <= probability 
+    """ Mutates a solution by randomly choosing a subset of vertices and flipping their labels.
+
+    Args:
+        solution (list): list of bits representing a solution for graph bipartitioning problem.
+        probability (float, optional): perturbation size. Defaults to 0.1.
+
+    Returns:
+        list: the mutated solution
+    """
+    N = len(solution) 
+    zeros_indexes, ones_indexes = [], []    
     for i in range(N):
-        if probabilities[i] == 1:
-            solution[i] = 1 - solution[i]        
-        if solution[i] == 0:
-            zeros.append(i)
+        if solution[i] == 1:
+            ones_indexes.append(i)        
         else:
-            ones.append(i)
-    
-    ## Ensuring that mutated solutions are still valid 
-    
-    if (len(zeros) == len(ones)):
-        return solution                        
-    
-    diff = int(abs(len(zeros) - len(ones)) / 2)
-    corrections = sample(ones, k=diff)  if (len(zeros) < len(ones)) else sample(zeros, k=diff)
-    
-    for i in corrections:
-        solution[i] = 1 - solution[i]     
+            zeros_indexes.append(i)
         
-    return solution
+    k = int(probability * N/2)    
+    ones_indexes_chosen = sample(ones_indexes, k=k) 
+    zeros_indexes_chosen = sample(zeros_indexes, k=k)     
+    
+    for i in range(k):        
+        solution[ones_indexes_chosen[i]] = 0    
+        solution[zeros_indexes_chosen[i]] = 1
+    
+    return solution   

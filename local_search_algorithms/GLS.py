@@ -1,3 +1,4 @@
+from math import ceil, floor
 from random import sample
 from local_search_algorithms.FM import FM, FM_pass
 from local_search_algorithms.utils import generate_random_solution
@@ -59,56 +60,53 @@ class GA:
             genome, fitness = FM(self.stopping_criterion, solution, self.graph)
             self.population.append(genome)
             self.fitnesses.append(fitness)
-            
+                
     def uniform_crossover(self, parent1, parent2):
         """Uniform crossover for graph bipartitioning solutions
-
+           Copy to the offspring the genes of the parents where they are the same
+           Where parents are different with probability 0.5, flip the markers
+           If parents differ in hamming distance by more than vertices/2, flip the representation for a parent
+           
         Args:
             parent1 (list)
             parent2 (list) 
 
         Returns:
             list: The generated offspring
-        """
-        ### Checking hamming distance of a parent if bigger than N/2 flip all bits and then do the crossover
+        """                
         assert(len(parent1) == len(parent2))
         assert(len(parent1) == self.N)        
         
+        ### Checking hamming distance of a parent if bigger than N/2 flip all bits and then do the crossover
         if (self.hamming_distance(parent1, parent2) > int(self.N/2)):
             parent2 = self.flip(parent2)            
         
-        probabilities = np.random.rand(self.solution_size) < 0.5
-        offspring = np.copy(parent1)           
-        zeros_indxes, ones_indxes = [], []
-        count_zeros = 0
         
-        for i in range(self.N):            
-            if probabilities[i] and not (parent1[i] == parent2[i]):
-                offspring[i] = parent2[i]
-                if offspring[i] == 0:
-                    zeros_indxes.append(i)
-                else:
-                    ones_indxes.append(i)
-            if offspring[i] == 0:
-                count_zeros += 1            
+        offspring = np.copy(parent1)
         
-        ### Checking if generated solution is consistent for graph bipartitioning
-        if not (count_zeros == int(self.N/2)):            
-            offspring = self.correct_solution(offspring, zeros_indxes, ones_indxes, count_zeros)                
+        # getting the set of indexes where parents disagree
+        disagreement_zeros, disagreement_ones = [], []        
+        for i in range(self.N):
+            if not parent1[i] == parent2[i]:                
+                if parent1[i] == 0:
+                    disagreement_zeros.append(i)
+                else:  
+                    disagreement_ones.append(i)
+        
+        assert(len(disagreement_zeros) == len(disagreement_ones))
+        
+        k = int(0.5 * len(disagreement_ones))                                                        
+        ones_indexes_sample = sample(disagreement_ones, k=k) 
+        zeros_indexes_sample = sample(disagreement_zeros, k=k) 
+        
+        for i in range(k):
+            offspring[ones_indexes_sample[i]] = 0
+            offspring[zeros_indexes_sample[i]] = 1
+        
+        assert(np.sum(offspring) == int(self.N/2))
         
         return offspring
-    
-    def correct_solution(self, solution, zeros, ones, count_zeros):        
-        """
-            Correcting the inconsistent solution by switching at random bits from the bigger class
-        """
-        diff = abs(count_zeros - int(self.N / 2))
-        corrections = sample(ones, k=diff)  if (count_zeros < int(self.N/2)) else sample(zeros, k=diff)    
-        for i in corrections:
-            solution[i] = 1 - solution[i]     
-            
-        return solution
-    
+        
     def hamming_distance(self, x, y):
         """ 
             Calculating the Hamming distance between to bit lists
