@@ -95,7 +95,8 @@ class GA:
         
         assert(len(disagreement_zeros) == len(disagreement_ones))
         
-        k = int(0.5 * len(disagreement_ones))                                                        
+        p = np.random.randint(0,1)
+        k = int(0.5 * len(disagreement_ones)) if len(disagreement_ones) % 2 == 0 else int(ceil(0.5 * len(disagreement_ones)))  if p == 0 else int(floor(0.5 * len(disagreement_ones)))                                                   
         ones_indexes_sample = sample(disagreement_ones, k=k) 
         zeros_indexes_sample = sample(disagreement_zeros, k=k) 
         

@@ -56,7 +56,7 @@ def experiment(results_file_name, func):
             file.write('\nRun time:' + str(end-start))
             if func.__name__ == 'ILS':
                 file.write('\nSame region proportion: ' + str(same_region_proportions))
-                file.write('\nAverage same region proportion: ' + np.mean(same_region_proportions) + '( ' + str(np.std(same_region_proportions)) + ' )')
+                file.write('\nAverage same region proportion: ' + str(np.mean(same_region_proportions)) + '( ' + str(np.std(same_region_proportions)) + ' )')
             file.close()
         print(f'Done, take a look in {results_file_name} ...')
     

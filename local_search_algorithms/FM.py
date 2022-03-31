@@ -1,6 +1,7 @@
 import numpy as np
 from llist import dllist
 from numba import jit
+from sklearn.metrics import max_error
 from local_search_algorithms.count_calls import count_calls
 
 def FM(stopping_criterion, solution, graph):
@@ -55,27 +56,28 @@ def FM_pass(solution, graph):
     initial_solution = solution[:]                   
     
     ##### initializing    
-    left_bucket, right_bucket, gains, cut, cells = compute_gain_buckets(solution, graph)                    
+    left_bucket, right_bucket, gains, cut, cells, max_degree = compute_gain_buckets(solution, graph)                    
     cuts, locked_vertices, free_vertices = np.zeros(N+1,dtype= int), np.zeros(N,dtype= int), np.ones(N, dtype=int)     
     cuts[0] = cut
     ##### -------------    
-    
+            
     ### removing vertex with the max gain and updating buckets    
     for i in range(N):    
         # choosing the bucket with the biggest nr of vertices
-        bucket = left_bucket if (i % 2 == 0) else right_bucket                
-            
-        best_gain = max(bucket.keys())  ## O(max_degree) max_degree <= |V|               
+        bucket = left_bucket if (i % 2 == 0) else right_bucket                                
+         
+        for j in range(len(bucket) - 1, -1, -1):  
+            if not bucket[j].size == 0:
+                best_gain = j
+                break                
                     
         v_fixed = bucket[best_gain].first.value # getting the first vertex with max gain from bucket                    
         solution[v_fixed] = 1 - solution[v_fixed] ## changing sides
         locked_vertices[i] = v_fixed # lock the vertex
         free_vertices[v_fixed] = 0 # mark as non-free
-        cuts[i + 1] = cuts[i] - int(best_gain) # save cuts value                        
-        bucket[best_gain].remove(cells[v_fixed]) ## remove from bucket  O(1)                      
+        cuts[i + 1] = cuts[i] - int(best_gain - max_degree) # save cuts value                        
+        bucket[best_gain].remove(cells[v_fixed]) ## remove from bucket  O(1)                                              
         
-        if bucket[best_gain].size == 0:
-            bucket.pop(best_gain)
         
         # updating gains and buckets        
         for v in graph[v_fixed]: ## getting the vertices for which gain to be updated
@@ -83,18 +85,11 @@ def FM_pass(solution, graph):
                 delta_gain = -2 if solution[v_fixed] == solution[v] else 2                                     
                 bucket = left_bucket if (solution[v] == 0) else right_bucket                
                                 
-                bucket[gains[v]].remove(cells[v])                                                                
-                
-                if bucket[gains[v]].size == 0:
-                    bucket.pop(gains[v]) # O(1)
-                    
+                bucket[gains[v] + max_degree].remove(cells[v])                                                                                                                    
                 gains[v] += delta_gain  
-                
-                if not (gains[v] in bucket.keys()): # O(1)
-                    bucket[gains[v]] = dllist()
-                    
-                bucket[gains[v]].appendright(v)
-                cells[v] = bucket[gains[v]].last
+                                                                    
+                bucket[gains[v]  + max_degree].appendright(v)
+                cells[v] = bucket[gains[v] + max_degree].last
                                     
     return find_optimal_solution(initial_solution, cuts, locked_vertices)
 
@@ -104,9 +99,17 @@ def compute_gain_buckets(solution, graph):
         Compute initial gains, initial cut and constructing buckets
         Complexity: O(|E|) - linear in number of edges    
     """ 
-           
-    N = len(graph)    
-    left_bucket, right_bucket = {},{}
+    
+    N = len(graph)  
+    max_degree = 0
+    for i in range(N):
+       if len(graph[i]) > max_degree:
+           max_degree = len(graph[i])
+    
+    left_bucket, right_bucket = [], []               
+    for i in range(2*max_degree + 2):
+        left_bucket.append(dllist())
+        right_bucket.append(dllist())      
     
     cut = 0
     gains = np.zeros(N, dtype=int)
@@ -117,18 +120,17 @@ def compute_gain_buckets(solution, graph):
         m = len(vs)
         co = int(np.sum(solution[vs])) ## all the ones in solution
         gain = part * (m - co) + (1 - part) * co      # if part == 0 then the counterpart with the sum of ones is co else the counterpart with sum of zeros is m - co, this is the positive part of gain
-        cut += gain 
+        cut += gain
         gain -= ((1 - part) * (m - co) + (part) * co) # if part == 0 then (m - co) zeros to subtract else co ones to subtract, the negative part of gain
+        gain = int(gain)
         gains[i] = gain
 
         bucket = left_bucket if part == 0 else right_bucket                                
+                                
+        bucket[gain + max_degree].appendright(i)            
+        cells.append(bucket[gain + max_degree].last)            
         
-        if not (gain in bucket.keys()): #O(1)
-            bucket[gain] = dllist()
-        bucket[gain].appendright(i)            
-        cells.append(bucket[gain].last)            
-        
-    return left_bucket, right_bucket, gains, int(cut/2), cells
+    return left_bucket, right_bucket, gains, int(cut/2), cells, max_degree
 
 @jit
 def find_optimal_solution(solution, cuts, locked_vertices): 

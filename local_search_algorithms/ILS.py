@@ -1,3 +1,4 @@
+from math import ceil, floor
 from random import sample
 from local_search_algorithms.FM import FM, FM_pass
 from local_search_algorithms.utils import generate_random_solution
@@ -105,7 +106,14 @@ def mutate(solution, probability = 0.1):
         else:
             zeros_indexes.append(i)
         
-    k = int(probability * N/2)    
+    k_rest = (probability * N / 2) % 1
+    if k_rest < 1:
+        if k_rest > np.random.random():
+            k = ceil(probability * N/2)        
+        else:
+            k = floor(probability * N/2)        
+    else:
+        k = floor(probability * N/2)        
     ones_indexes_chosen = sample(ones_indexes, k=k) 
     zeros_indexes_chosen = sample(zeros_indexes, k=k)     
     
