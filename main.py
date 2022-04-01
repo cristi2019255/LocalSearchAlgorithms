@@ -2,11 +2,8 @@ from datetime import datetime
 from graph_tools.generator import generate_graph
 from graph_tools.ploter import plot_graph, plot_partitioned_graph
 from graph_tools.reader import read_graph_from_file
-from local_search_algorithms.FM import FM_pass
 from local_search_algorithms.GLS import GLS
-from local_search_algorithms.ILS import ILS, adaptive_ILS
-from local_search_algorithms.MLS import MLS
-from utils import RESULTS_DIRECTORY, compute_statistics, experiment, experiments_delta_time, experiments_stop_after_calls, stop_after_calls
+from utils import experiments_delta_time, experiments_stop_after_calls, stop_after_calls
 
 
 FILE_NAME = './G500.txt'

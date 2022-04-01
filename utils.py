@@ -32,7 +32,7 @@ def compute_statistics(title = 'comparison of local search algorithms', x_label 
     plt.ylabel(y_label)    
     fig_name = './Results/' + title + '.png'
     fig.savefig(fig_name, dpi=fig.dpi)
-    plt.show()
+    #plt.show()
 
 def experiment(results_file_name, func):
     def experiment_wrapper(*args, **kwargs):                
@@ -47,12 +47,13 @@ def experiment(results_file_name, func):
                 else:               
                     _, optimum_cut = func(*args, **kwargs)            
 
+                file.write(str(optimum_cut) + ' ')
                 optimum_cuts.append(optimum_cut)                                                                          
             end = datetime.now()
             
-            print('Run time: ' + str(end-start))                     
-            file.write('Optimum cuts: ' + str(optimum_cuts))                            
+            print('Run time: ' + str(end-start))                                 
             file.write('\nAverage optimum cut: ' + str(np.mean(optimum_cuts)) + '( ' + str(np.std(optimum_cuts)) + ' )')
+            file.write('\nMedian optimum cut: ' + str(np.median(optimum_cuts)))
             file.write('\nRun time:' + str(end-start))
             if func.__name__ == 'ILS':
                 file.write('\nSame region proportion: ' + str(same_region_proportions))
@@ -111,6 +112,9 @@ def experiments_delta_time(graph, ils_probability = 0.15, gls_population_size = 
         file.write('\nAverage mls optimum: ' + str(np.mean(mls_optimums)) + '( ' + str(np.std(mls_optimums)) + ' )')
         file.write('\nAverage ils optimum: ' + str(np.mean(ils_optimums)) + '( ' + str(np.std(ils_optimums)) + ' )')
         file.write('\nAverage gls optimum: ' + str(np.mean(gls_optimums)) + '( ' + str(np.std(gls_optimums)) + ' )')
+        file.write('\nMedian mls optimum: ' + str(np.median(mls_optimums)))
+        file.write('\nMedian ils optimum: ' + str(np.median(ils_optimums)))
+        file.write('\nMedian gls optimum: ' + str(np.median(gls_optimums)))
         file.close()
     
     compute_statistics(title = 'Comparison of local searchers with fixed delta_time', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_' + str(ils_probability), 'GLS'])
@@ -121,10 +125,10 @@ def experiments_delta_time(graph, ils_probability = 0.15, gls_population_size = 
     plt.ylabel('Delta time')    
     fig_name = RESULTS_DIRECTORY + 'Delta_times' + '.png'
     fig.savefig(fig_name, dpi=fig.dpi)
-    plt.show()
+    #plt.show()
 
 def experiments_stop_after_calls(graph):
-    experiment(RESULTS_DIRECTORY + 'MLS.txt', MLS)(graph = graph, stopping_criterion = stop_after_calls)
+    #experiment(RESULTS_DIRECTORY + 'MLS.txt', MLS)(graph = graph, stopping_criterion = stop_after_calls)
     
     # experiments ILS
     experiment(RESULTS_DIRECTORY + 'ILS_004.txt', ILS)(graph = graph, probability = 0.004 , stopping_criterion = stop_after_calls)

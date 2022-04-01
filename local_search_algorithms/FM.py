@@ -35,7 +35,7 @@ def FM_pass(solution, graph):
 
         Complexity O(|E|) - linear in number of edges    
         ------------------------------------------------------------------------------------------------------------------------------
-        Bucket data structure: Dictionary with gain as key and a doubly linked list of vertices with the corresponding gain as element
+        Bucket data structure: List with gain + max_degree as index and a doubly linked list of vertices with the corresponding gain as element
         Cells: The list of references to the vertices objects in the doubly linked list 
         (this references are kept to make the complexity of removing from list O(1))
         locked_vertices: a list that keep the order in which the vertices were chosen
@@ -61,15 +61,33 @@ def FM_pass(solution, graph):
     cuts[0] = cut
     ##### -------------    
             
+    lfrs = True # left first right second buckets order
+    # choosing the bucket with the highest gain
+    first_bucket, second_bucket = left_bucket, right_bucket
+    for j in range(len(left_bucket) - 1, -1, -1):  
+        if not left_bucket[j].size == 0:            
+            highest_gain_first, highest_gain_second = j, j        
+            break        
+        if not right_bucket[j].size == 0:
+            highest_gain_first, highest_gain_second = j, j 
+            first_bucket, second_bucket = right_bucket, left_bucket
+            lfrs = False
+            break        
+            
     ### removing vertex with the max gain and updating buckets    
     for i in range(N):    
         # choosing the bucket with the biggest nr of vertices
-        bucket = left_bucket if (i % 2 == 0) else right_bucket                                
-         
-        for j in range(len(bucket) - 1, -1, -1):  
-            if not bucket[j].size == 0:
-                best_gain = j
-                break                
+        first = (i % 2 == 0)        
+        bucket = first_bucket if first else second_bucket                                
+        highest_gain = highest_gain_first if first else highest_gain_second 
+        
+        # removing vertex with the max gain
+        
+        # getting the max gain from the bucket
+        while bucket[highest_gain].size == 0:
+            highest_gain -= 1
+            
+        best_gain = highest_gain        
                     
         v_fixed = bucket[best_gain].first.value # getting the first vertex with max gain from bucket                    
         solution[v_fixed] = 1 - solution[v_fixed] ## changing sides
@@ -78,6 +96,14 @@ def FM_pass(solution, graph):
         cuts[i + 1] = cuts[i] - int(best_gain - max_degree) # save cuts value                        
         bucket[best_gain].remove(cells[v_fixed]) ## remove from bucket  O(1)                                              
         
+        # updating highest possible gain for next iterations
+        if bucket[best_gain].size == 0:
+            highest_gain -= 1
+        
+        if first:            
+            highest_gain_first = highest_gain
+        else:
+            highest_gain_second = highest_gain
         
         # updating gains and buckets        
         for v in graph[v_fixed]: ## getting the vertices for which gain to be updated
@@ -89,8 +115,23 @@ def FM_pass(solution, graph):
                 gains[v] += delta_gain  
                                                                     
                 bucket[gains[v]  + max_degree].appendright(v)
-                cells[v] = bucket[gains[v] + max_degree].last
-                                    
+                cells[v] = bucket[gains[v] + max_degree].last                                
+                
+                
+                # updating highest possible gain for next iterations
+                # can increase with at most 2
+                if (solution[v] == 0): 
+                    if lfrs:
+                        highest_gain_first = max(highest_gain_first, gains[v] + max_degree)
+                    else:
+                        highest_gain_second = max(highest_gain_second, gains[v] + max_degree)
+                else:
+                    if lfrs:
+                        highest_gain_second = max(highest_gain_second, gains[v] + max_degree)
+                    else:
+                        highest_gain_first = max(highest_gain_first, gains[v] + max_degree)
+                
+                
     return find_optimal_solution(initial_solution, cuts, locked_vertices)
 
 
