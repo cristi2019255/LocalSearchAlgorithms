@@ -26,7 +26,7 @@ def main():
     
     experiments_stop_after_calls(graph)    
     
-    experiments_delta_time(graph)         
+    #experiments_delta_time(graph)         
     
 if __name__ == '__main__':
     main()

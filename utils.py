@@ -90,7 +90,7 @@ def experiments_delta_time(graph, ils_probability = 0.15, gls_population_size = 
 
         print('ILS ...')        
         end_time = time() + delta_time
-        _, optimum_ils = ILS(graph=graph, probability=ils_probability, stopping_criterion=create_stop_after_delta_time(end_time))
+        _, optimum_ils, _ = ILS(graph=graph, probability=ils_probability, stopping_criterion=create_stop_after_delta_time(end_time))
         
         print('GLS ...')
         end_time = time() + delta_time

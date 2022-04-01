@@ -13,7 +13,7 @@ def ILS(stopping_criterion, graph = [], probability = 0.1):
         graph (list, optional): Defaults to [].
         probability(float, optional): The perturbation size for solutions. Defaults to 0.1. 
     Returns:
-        (list, int): best solution found & minimum number of cuts
+        (list, int, float): best solution found & minimum number of cuts, same region of attraction ratio
     """
     N = len(graph)
     solution = generate_random_solution(N)
