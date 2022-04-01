@@ -1,7 +1,6 @@
 import numpy as np
 from llist import dllist
 from numba import jit
-from sklearn.metrics import max_error
 from local_search_algorithms.count_calls import count_calls
 
 def FM(stopping_criterion, solution, graph):
