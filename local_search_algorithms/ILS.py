@@ -38,7 +38,7 @@ def ILS(stopping_criterion, graph = [], probability = 0.1):
     FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0            
     return optimum, min_cuts, (same_attraction_region / nr_perturbations)
 
-def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta = 0.5, operators = []):
+def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [], reward_binary = True):
     """
     Adaptive algorithm for iterated local search that choose the best perturbation operator from a list of given operators 
     for graph bipartitioning problem.
@@ -71,7 +71,7 @@ def adaptive_ILS(stopping_criterion, graph = [], P_min = 0.1, alpha = 0.5, beta 
         if cuts < min_cuts:
             optimum = new_optimum          
             min_cuts = cuts          
-            reward = 1
+            reward = 1 if reward_binary else (min_cuts - cuts)
             print(f'New best optimum: {cuts}')
         else:
             reward = 0
