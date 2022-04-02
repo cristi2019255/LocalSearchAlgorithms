@@ -31,8 +31,7 @@ def compute_statistics(title = 'comparison of local search algorithms', x_label 
     plt.xlabel(x_label)
     plt.ylabel(y_label)    
     fig_name = './Results/' + title + '.png'
-    fig.savefig(fig_name, dpi=fig.dpi)
-    #plt.show()
+    fig.savefig(fig_name, dpi=fig.dpi)    
 
 def experiment(results_file_name, func):
     def experiment_wrapper(*args, **kwargs):                
@@ -78,7 +77,7 @@ def create_stop_after_delta_time(end_time):
     
     return stop_after_delta_time    
 
-def experiments_delta_time(graph, ils_probability = 0.15, gls_population_size = 50):
+def experiments_delta_time(graph, ils_probability = 0.175, gls_population_size = 50):
     ### experiments with stopping criterion delta_time     
     mls_optimums, ils_optimums, gls_optimums = [], [], []
     delta_times = []
@@ -117,35 +116,33 @@ def experiments_delta_time(graph, ils_probability = 0.15, gls_population_size = 
         file.write('\nMedian gls optimum: ' + str(round(np.median(gls_optimums),4)))
         file.close()
     
-    compute_statistics(title = 'Comparison of local searchers with fixed delta_time', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_' + str(ils_probability), 'GLS'])
     fig = plt.figure()
     plt.title('Delta time')
     plt.plot(delta_times)
     plt.xlabel('Run')
     plt.ylabel('Delta time')    
     fig_name = RESULTS_DIRECTORY + 'Delta_times' + '.png'
-    fig.savefig(fig_name, dpi=fig.dpi)
-    #plt.show()
+    fig.savefig(fig_name, dpi=fig.dpi)    
 
 def experiments_stop_after_calls(graph):
-    #experiment(RESULTS_DIRECTORY + 'MLS.txt', MLS)(graph = graph, stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'MLS.txt', MLS)(graph = graph, stopping_criterion = stop_after_calls)
     
-    # experiments ILS
-    experiment(RESULTS_DIRECTORY + 'ILS_004.txt', ILS)(graph = graph, probability = 0.004 , stopping_criterion = stop_after_calls)
+    # experiments ILS    
     experiment(RESULTS_DIRECTORY + 'ILS_05.txt', ILS)(graph = graph, probability = 0.05 , stopping_criterion = stop_after_calls)
     experiment(RESULTS_DIRECTORY + 'ILS_10.txt', ILS)(graph = graph, probability = 0.1 , stopping_criterion = stop_after_calls)
     experiment(RESULTS_DIRECTORY + 'ILS_15.txt', ILS)(graph = graph, probability = 0.15 , stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'ILS_175.txt', ILS)(graph = graph, probability = 0.175 , stopping_criterion = stop_after_calls)
     experiment(RESULTS_DIRECTORY + 'ILS_20.txt', ILS)(graph = graph, probability = 0.2 , stopping_criterion = stop_after_calls)
     experiment(RESULTS_DIRECTORY + 'ILS_50.txt', ILS)(graph = graph, probability = 0.5 , stopping_criterion = stop_after_calls)
     
-    #experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_05_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [0.004, 0.05, 0.1, 0.15, 0.2, 0.5], reward_binary = True)
-    #experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_05_reward_non_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [0.004, 0.05, 0.1, 0.15, 0.2, 0.5], reward_binary = False)
+    experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_05_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = True)
+    experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_05_reward_non_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = False)
     
-    #experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_08_beta_05_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.8, beta = 0.5, operators = [0.004, 0.05, 0.1, 0.15, 0.2, 0.5], reward_binary = True)
-    #experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_08_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.8, operators = [0.004, 0.05, 0.1, 0.15, 0.2, 0.5], reward_binary = True)
+    experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_08_beta_05_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.8, beta = 0.5, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = True)
+    experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_08_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.8, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = True)
         
-    #experiment(RESULTS_DIRECTORY + 'GLS_50.txt', GLS)(graph = graph, population_size = 50, stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'GLS_50.txt', GLS)(graph = graph, population_size = 50, stopping_criterion = stop_after_calls)
+        
+    compute_statistics(title = 'Comparison of iterative local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_05', 'ILS_10', 'ILS_15', 'ILS_175', 'ILS_20', 'ILS_50'])
+    compute_statistics(title = 'Comparison of local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_175', 'GLS_50'])
     
-    #compute_statistics(title = 'Comparison of iterative local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_004', 'ILS_05', 'ILS_10', 'ILS_15', 'ILS_20', 'ILS_50'])
-    #compute_statistics(title = 'Comparison of local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_15', 'GLS_50'])
-    #compute_statistics(title = 'Comparison of adaptive ILS with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['ILS_15','ILS_pmin_01_alpha_05_beta_05_reward_binary', 'ILS_pmin_01_alpha_05_beta_05_reward_non_binary', 'ILS_pmin_01_alpha_08_beta_05_reward_binary', 'ILS_pmin_01_alpha_05_beta_08_reward_binary'])

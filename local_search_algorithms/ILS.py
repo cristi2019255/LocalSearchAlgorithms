@@ -106,14 +106,10 @@ def mutate(solution, probability = 0.1):
         else:
             zeros_indexes.append(i)
         
-    k_rest = (probability * N / 2) % 1
-    if k_rest < 1:
-        if k_rest > np.random.random():
-            k = ceil(probability * N/2)        
-        else:
-            k = floor(probability * N/2)        
-    else:
-        k = floor(probability * N/2)        
+        
+    p = probability * N/2           
+    k = int(ceil(p)) if p % 1 > np.random.random() else int(floor(p))        
+        
     ones_indexes_chosen = sample(ones_indexes, k=k) 
     zeros_indexes_chosen = sample(zeros_indexes, k=k)     
     
