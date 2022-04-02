@@ -137,12 +137,16 @@ def experiments_stop_after_calls(graph):
     
     experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_05_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = True)
     experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_05_reward_non_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.5, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = False)
-    
     experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_08_beta_05_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.8, beta = 0.5, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = True)
     experiment(RESULTS_DIRECTORY + 'adaptive_ILS_pmin_01_alpha_05_beta_08_reward_binary.txt', adaptive_ILS)(graph = graph, stopping_criterion = stop_after_calls, P_min = 0.1, alpha = 0.5, beta = 0.8, operators = [0.05, 0.1, 0.15, 0.175, 0.2, 0.5], reward_binary = True)
         
     experiment(RESULTS_DIRECTORY + 'GLS_50.txt', GLS)(graph = graph, population_size = 50, stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'GLS_10.txt', GLS)(graph = graph, population_size = 10, stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'GLS_100.txt', GLS)(graph = graph, population_size = 100, stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'GLS_150.txt', GLS)(graph = graph, population_size = 150, stopping_criterion = stop_after_calls)
+    experiment(RESULTS_DIRECTORY + 'GLS_200.txt', GLS)(graph = graph, population_size = 200, stopping_criterion = stop_after_calls)
         
     compute_statistics(title = 'Comparison of iterative local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_05', 'ILS_10', 'ILS_15', 'ILS_175', 'ILS_20', 'ILS_50'])
     compute_statistics(title = 'Comparison of local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['MLS', 'ILS_175', 'GLS_50'])
+    compute_statistics(title = 'Comparison of genetic local searchers with fixed number of FM_pass calls', x_label = 'local searcher', y_label = 'Optimum cuts', experiments = ['GLS_10', 'GLS_50', 'GLS_100', 'GLS_150', 'GLS_200'])
     
