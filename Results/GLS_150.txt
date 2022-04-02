@@ -1,0 +1,4 @@
+2 2 3 2 4 2 3 2 2 2 4 2 5 2 3 6 2 8 5 2 2 6 4 5 2 
+Average optimum cut: 3.28 (1.6618) 
+Median optimum cut: 2.0
+Run time:0:43:53.645029
