@@ -3,7 +3,7 @@ from graph_tools.generator import generate_graph
 from graph_tools.ploter import plot_graph, plot_partitioned_graph
 from graph_tools.reader import read_graph_from_file
 from local_search_algorithms.GLS import GLS
-from utils import experiments_delta_time, experiments_stop_after_calls, stop_after_calls
+from utils import create_stop_after_delta_time, experiments_delta_time, experiments_stop_after_calls, stop_after_calls
 
 
 FILE_NAME = './G500.txt'
@@ -24,9 +24,8 @@ def main():
     #plot_graph(graph, positions)       
     #test_FM(graph, positions)
     
-    experiments_stop_after_calls(graph)    
-    
-    #experiments_delta_time(graph)         
+    #experiments_stop_after_calls(graph)      
+    experiments_delta_time(graph)         
     
 if __name__ == '__main__':
     main()

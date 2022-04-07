@@ -18,6 +18,7 @@ def GLS(stopping_criterion, population_size = 5, graph = []):
     FM_pass.set_count_calls(0)
     ga = GA(graph, stopping_criterion)    
     solution, optimum = ga.resolve(population_size=population_size)
+    print(FM_pass.call_count)
     FM_pass.set_count_calls(0)
     return solution, optimum
 

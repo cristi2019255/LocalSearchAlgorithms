@@ -16,6 +16,6 @@ def MLS(stopping_criterion, graph = []):
             print("New best optimum: " + str(cuts))
             best_optimum = local_optimum
             min_cuts = cuts
-        
+    print(FM_pass.call_count)
     FM_pass.set_count_calls(0) ## setting the number of calls of FM_pass to 0
     return best_optimum, min_cuts

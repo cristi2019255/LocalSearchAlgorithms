@@ -34,7 +34,7 @@ def ILS(stopping_criterion, graph = [], probability = 0.1):
         nr_perturbations += 1
     
     print(f'Same region of attraction: {same_attraction_region}/{nr_perturbations}')    
-   
+    print(FM_pass.call_count)
     FM_pass.set_count_calls(0) ## setting count calls of FM_pass to 0            
     return optimum, min_cuts, (same_attraction_region / nr_perturbations)
 
