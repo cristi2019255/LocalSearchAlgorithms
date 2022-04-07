@@ -81,7 +81,7 @@ def experiments_delta_time(graph, ils_probability = 0.175, gls_population_size =
     ### experiments with stopping criterion delta_time     
     mls_optimums, ils_optimums, gls_optimums = [], [], []
     delta_times = []
-    for _ in tqdm(range(25)):
+    for _ in tqdm(range(NR_OF_FM_CALLS)):
         print('MLS ...')
         start = time()
         _, optimum_mls = MLS(graph = graph, stopping_criterion=stop_after_calls)        
